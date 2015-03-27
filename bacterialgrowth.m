@@ -10,7 +10,7 @@
 %}
 function S = BctSimulateCellGrowth(length, width, max)
     w= width;               % initial width in micrometers.
-	l= length;              % initial length in micrometers.
+    l= length;              % initial length in micrometers.
     avgd= 1000.0;           % Average cell density in kg/m^3.
     stdd= 4.0;              % Standard deviation of cell density in kg/m^3.
     
