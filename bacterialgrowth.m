@@ -14,8 +14,12 @@
 function output = sim_growth(model, l0, ln, w, rho, h, s)
    switch model
       case 1
-         output = sim_elongation1(l0, ln, w, rho, h, s);
+         output = sim_elongation(l0, ln, w, rho, h, s, model);
          
+         
+      case 2
+         output = sim_elongation(l0, ln, w, rho, h, s, model);
+      
       otherwise
 	      fprintf('Invalid simulation function! Valid options are:\n');
 	      fprintf('\t 1 for linear uptake\n');
@@ -30,7 +34,7 @@ end
  	@title Simulates the bacterial cell envelope elongation and growth
 %}
 
-function output = sim_elongation1(l0, ln, w0, rho, steps, rodshape)
+function output = sim_elongation(l0, ln, w0, rho, steps, rodshape, uptake)
    %% ----- Handling missing parameters
    if ~exist('l0', 'var'), ln = 1.0; end
    if ~exist('ln', 'var'), ln = 2.0; end
@@ -38,6 +42,7 @@ function output = sim_elongation1(l0, ln, w0, rho, steps, rodshape)
    if ~exist('rho', 'var'), rho = 1.0; end
    if ~exist('steps', 'var'), steps = 100; end
    if ~exist('rodshape', 'var'), rodshape = true; end
+   if ~exist('uptake', 'var'), uptake = 1; end
    
    %% ----- Initialization
    rho = rho * 1000.0;              %% ----- SI, Kg/m3
@@ -54,7 +59,21 @@ function output = sim_elongation1(l0, ln, w0, rho, steps, rodshape)
    %% ----- Main simulation loop
    for i = 1:steps
       [s, v] = b_envelope(l0, w);
-      m = m0 + normrnd(delta, delta * 0.1);    %% ---- Simple linear uptake with gaussian noise             
+      
+      switch uptake
+         case 1
+            m = m0 + normrnd(delta, delta * 0.1);     %% ----- Simple linear uptake with gaussian noise             
+               
+         case 2
+            V = delta * exp(0.1 * s); 
+            m = m0 + normrnd(V, V * 0.1);                   %% ----- Exponential uptake
+            %m = m0 + V;                                    %% ----- Exponential uptake
+               
+         otherwise
+            m = m0 + normrnd(delta, delta * 0.1);     %% ----- Simple linear uptake with gaussian noise                
+      end
+      
+      
       l = b_length(m0, m, w0, w, l0);   
       output(i, :) = [ i, l0, v, s, (s/v), (m/femtogram), l];                  
       
@@ -62,8 +81,10 @@ function output = sim_elongation1(l0, ln, w0, rho, steps, rodshape)
       if ~rodshape, w = w0 = l; end
       m0 = m;         
       l0 = l;
+      
+      if l0 >= ln, break; end;
    end
-   %%BctPlotCellData(output); 
+   output = output(1:i, :)
 end
 
 %{ 
@@ -154,14 +175,14 @@ end
 %}
 function sim_plot(output)
    S = output;
-	subplot(2,2,1); hold all;
+	subplot(2,2,1); hold all; grid on;
    plot(S(:,2), S(:,3)); xlabel('Length (micrometers)'); ylabel('Volume (micrometers^3)'); title('Cell volume'); hold all; 
-   subplot(2,2,2); hold all;
+   subplot(2,2,2); hold all; grid on;
    plot(S(:,2), S(:,4)); xlabel('Length (micrometers)'); ylabel('Surface (micrometers^2)'); title('Cell surface'); hold all;
-   subplot(2,2,3); hold all;
+   subplot(2,2,3); hold all; grid on;
    plot(S(:,2), S(:,5)); xlabel('Length (micrometers)'); ylabel('Surface/Volume'); title('Cell S/V ratio'); hold all;
-   subplot(2,2,4); hold all;
+   subplot(2,2,4); hold all; grid on;
    plot(S(:,2), S(:,6)); xlabel('Length (micrometers)'); ylabel('Mass (femtograms)'); title('Cell mass');  
-   %subplot(2,2,5); hold all;
+   %subplot(2,2,5); hold all; grid on;
    %plot(S(:,2), S(:,7)); xlabel('Length (micrometers)'); ylabel('Length (micrometers) estimated'); title('Cell Length');  
 end
