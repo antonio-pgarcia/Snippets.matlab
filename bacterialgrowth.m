@@ -5,11 +5,10 @@
 %% For license terms see DESCRIPTION and/or LICENSE
 %%
 %% $Id$
-##================================================================================
+%%================================================================================
 
 %{
    @title sim_growth
-
 %}
 function output = sim_growth(model, l0, ln, w, rho, h, s)
    switch model
@@ -49,7 +48,7 @@ function output = sim_elongation(l0, ln, w0, rho, steps, rodshape, uptake)
    output = zeros(steps,7);         
    
    %% ----- Parameter validation
-   if ~rodshape && ~(l0 == w0), fprintf("Spherical cells should have l0 == w0\n"); return; end
+   if ~rodshape && ~(l0 == w0), fprintf('Spherical cells should have l0 == w0\n'); return; end
    
    w = w0;
    m0 = normrnd(rho, rho * 0.1) * b_volume(l0 * micrometer, w0 * micrometer);
@@ -78,13 +77,13 @@ function output = sim_elongation(l0, ln, w0, rho, steps, rodshape, uptake)
       output(i, :) = [ i, l0, v, s, (s/v), (m/femtogram), l];                  
       
       %% ----- Updating values for next step
-      if ~rodshape, w = w0 = l; end
+      if ~rodshape, w = l; w0 = l; end
       m0 = m;         
       l0 = l;
       
       if l0 >= ln, break; end;
    end
-   output = output(1:i, :)
+   output = output(1:i, :);
 end
 
 %{ 
@@ -95,7 +94,6 @@ end
    @param w The bacterial envelope width
    
    @return The volume
-
 %}
 function output = b_volume(l, w)
    output = ( (w^2 * pi/4) * (l-w) ) + (pi * w^3/6);
@@ -109,7 +107,6 @@ end
    @param w The bacterial envelope width
    
    @return The volume
-
 %}
 function output = b_area(l, w)
    output = pi * w * (l - w) + pi * w^2;   
@@ -123,7 +120,6 @@ end
    @param w The bacterial envelope width
    
    @return The area and volume
-
 %}
 function [a, v] = b_envelope(l, w)
    a = b_area(l, w);
@@ -160,7 +156,6 @@ end
    @param l0 The bacterial lenght at time t
    
    @return The length at time t+1
-
 %}
 function output = b_length(m0, m1, w0, w1, l0)
    output = (w1^3 * m1 - w0^3 * m1 + 3 * w0^2 * l0 * m1) / (3 * m0 * w1^2); 
